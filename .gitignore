@@ -1,0 +1,6 @@
+*.v
+*.json
+*.fir
+target
+.bsp
+project
