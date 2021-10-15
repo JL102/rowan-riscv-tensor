@@ -1,2 +1,2 @@
 # rowan-riscv-tensor
-test
+A RISCV based matrix multiplication accelerator, built using Chipyard.
