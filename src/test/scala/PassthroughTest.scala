@@ -4,8 +4,8 @@ import org.scalatest._
 
 class PassthroughMemeTest extends FlatSpec with Matchers {
     
-    "PassthroughGenerator" should "pass" in {
-        chisel3.iotesters.Driver(() => new PassthroughGenerator(69)) {c => 
+    "CumSum" should "pass" in {
+        chisel3.iotesters.Driver(() => new CumSum(64)) {c => 
             new PeekPokeTester(c) {
                 poke(c.io.MA_1, 8.S);
 		poke(c.io.MA_2, 8.S);

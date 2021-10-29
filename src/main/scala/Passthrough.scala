@@ -25,5 +25,5 @@ class CumSum(width: Int) extends Module {
 
 
 object MultiplierOBJ extends App {
-  (new chisel3.stage.ChiselStage).emitVerilog(new PassthroughGenerator(64))
+  (new chisel3.stage.ChiselStage).emitVerilog(new CumSum(64))
 }
