@@ -7,11 +7,18 @@ class PassthroughMemeTest extends FlatSpec with Matchers {
     "PassthroughGenerator" should "pass" in {
         chisel3.iotesters.Driver(() => new PassthroughGenerator(69)) {c => 
             new PeekPokeTester(c) {
-                poke(c.io.in, 1.S);
-                step(1);
-                expect(c.io.out, 2.S);
-                expect(c.io.meme, 421.S);
-                println("\nHello, meme=" + peek(c.io.meme).toString + ", out=" + peek(c.io.out).toString);
+                poke(c.io.MA_1, 8.S);
+		poke(c.io.MA_2, 8.S);
+		poke(c.io.MA_3, 8.S);
+
+		poke(c.io.MB_1, 6.S);
+		poke(c.io.MB_2, 6.S);
+		poke(c.io.MB_3, 6.S);
+
+		step(1);
+                expect(c.io.out, 144.S);
+		println("\nInputS" + peek(c.io).toString);
+                println("\nHello, meme=" + peek(c.io.out).toString + ", out=" + peek(c.io.out).toString);
             }
         } should be (true)
     }
