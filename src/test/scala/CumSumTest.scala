@@ -2,7 +2,7 @@ import chisel3._
 import chisel3.iotesters.PeekPokeTester
 import org.scalatest._
 
-class PassthroughMemeTest extends FlatSpec with Matchers {
+class CumSumTestA extends FlatSpec with Matchers {
     
     "CumSum" should "pass" in {
         chisel3.iotesters.Driver(() => new CumSum(64)) {c => 
