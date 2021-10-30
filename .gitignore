@@ -4,3 +4,5 @@
 target
 .bsp
 project
+log.txt
+*.riscv
