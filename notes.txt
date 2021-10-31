@@ -1,0 +1,8 @@
+Add to build.sbt of chipyard:
+
+lazy val customtensor = (project in file("generators/customtensor"))
+  .dependsOn(rocketchip)
+  .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(commonSettings)
+  
+AND in lazy val chipyard, add customtensor to the list
