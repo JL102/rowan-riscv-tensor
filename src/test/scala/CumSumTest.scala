@@ -5,20 +5,28 @@ import org.scalatest._
 class CumSumTestA extends FlatSpec with Matchers {
     
     "CumSum" should "pass" in {
-        chisel3.iotesters.Driver(() => new CumSum(64)) {c => 
+        chisel3.iotesters.Driver(() => new CumSum(64)(3)) {c => 
             new PeekPokeTester(c) {
-                poke(c.io.MA_1, 8.S);
-		poke(c.io.MA_2, 8.S);
-		poke(c.io.MA_3, 8.S);
+		println("------------------------");
+                poke(c.io.MA(0), 8.S);
+		poke(c.io.MA(1), 8.S);
+		poke(c.io.MA(2), 8.S);
+		
+		println("MA is " + peek(c.io.MA).toString);
 
-		poke(c.io.MB_1, 6.S);
-		poke(c.io.MB_2, 6.S);
-		poke(c.io.MB_3, 6.S);
+		poke(c.io.MB(0), 6.S);
+		poke(c.io.MB(1), 6.S);
+		poke(c.io.MB(2), 6.S);
 
+		println("MB is " + peek(c.io.MB).toString);
+		println("Step now");
 		step(1);
+		println("Stepped");
+		println(c.OutReg.toString);
                 expect(c.io.out, 144.S);
-		println("\nInputS" + peek(c.io).toString);
-                println("\nHello, meme=" + peek(c.io.out).toString + ", out=" + peek(c.io.out).toString);
+		println(peek(c.io.out).toString);
+//		println("\nInputS" + peek(c.io).toString);
+//                println("\nHello, MA(0)" + peek(c.io.out).toString + ", out=" + peek(c.io.out).toString);
             }
         } should be (true)
     }
