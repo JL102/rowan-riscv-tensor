@@ -2,10 +2,10 @@ import chisel3._
 import chisel3.iotesters.PeekPokeTester
 import org.scalatest._
 
-class CumSumTestA extends FlatSpec with Matchers {
+class MulSumTestA extends FlatSpec with Matchers {
     
-    "CumSum" should "pass" in {
-        chisel3.iotesters.Driver(() => new CumSum(64)(3)) {c => 
+    "MulSum" should "pass" in {
+        chisel3.iotesters.Driver(() => new MulSum(64)(3)) {c => 
             new PeekPokeTester(c) {
 		println("------------------------");
                 poke(c.io.MA(0), 8.S);
@@ -22,7 +22,6 @@ class CumSumTestA extends FlatSpec with Matchers {
 		println("Step now");
 		step(1);
 		println("Stepped");
-		println(c.OutReg.toString);
                 expect(c.io.out, 144.S);
 		println(peek(c.io.out).toString);
 //		println("\nInputS" + peek(c.io).toString);

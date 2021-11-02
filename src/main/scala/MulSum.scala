@@ -2,7 +2,7 @@ import chisel3._
 
 
 // Chisel Code, but pass in a parameter to set widths of ports
-class CumSum(width: Int)(numInputs: Int) extends Module { 
+class MulSum(width: Int)(numInputs: Int) extends Module { 
   val io = IO(new Bundle {
 	/*
 	val MA_1 = Input(UInt(width.W));
@@ -17,21 +17,18 @@ class CumSum(width: Int)(numInputs: Int) extends Module {
 	val MB = Input(Vec(numInputs, UInt(width.W)));
 	val out = Output(UInt(width.W));
   });
- var a = 0;
- var b = 0;
+// var a = 0;
  val OutReg = RegInit(0.U(width.W));
   
- // OutReg := (io.MA(0) * io.MB(0)) + (io.MA(1) * io.MB(1)) + (io.MA(2) * io.MB(2));
- // io.out := OutReg;
+ OutReg := (io.MA(0) * io.MB(0)) + (io.MA(1) * io.MB(1)) + (io.MA(2) * io.MB(2)) + (io.MA(3) * io.MB(3));
 
-  while( a <= numInputs){
+//  while( a <= numInputs){
 //	OutReg := OutReg + (io.MA(a) * io.MB(a));
 //	OutReg := OutReg + io.MA(a);//errors out for some reason
-	OutReg := OutReg + a.U;		
-//io.MB(a) := a;
-	a = a + 1;
-	b = b + 1;
-  }
+//	OutReg := OutReg + a.U;		
+//	io.MB(a) := a;
+//	a = a + 1;
+//  }
 
   io.out := OutReg;
 }
@@ -39,5 +36,5 @@ class CumSum(width: Int)(numInputs: Int) extends Module {
 
 
 object MultiplierOBJ extends App {
-  (new chisel3.stage.ChiselStage).emitVerilog(new CumSum(64)(3))
+  (new chisel3.stage.ChiselStage).emitVerilog(new MulSum(64)(4))
 }
