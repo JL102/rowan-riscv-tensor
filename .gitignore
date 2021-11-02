@@ -4,7 +4,7 @@
 target
 .bsp
 project
-
-
+log.txt
+*.riscv
 #Swap files from nano
 *.swp
