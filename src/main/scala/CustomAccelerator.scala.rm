@@ -1,21 +1,27 @@
 package customtensor
 
-import Chisel._
+import chisel3._
 import chisel3.util.{HasBlackBoxResource}
+import chisel3.experimental.IO
 import freechips.rocketchip.tile._
 import freechips.rocketchip.config._
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.rocket.{TLBConfig, HellaCacheReq}
 
-class CustomAccelerator(opcodes: OpcodeSet)
+class CustomAccelerator(opcodes: OpcodeSet, width: Int)
     (implicit p: Parameters) extends LazyRoCC(opcodes) {
-  override lazy val module = new CustomAcceleratorModule(this)
+  override lazy val module = new CustomAcceleratorModule(this, width)
 }
 
-class CustomAcceleratorModule(outer: CustomAccelerator)
+class CustomAcceleratorModule(outer: CustomAccelerator, width: Int)
     extends LazyRoCCModuleImp(outer) {
-  // val cmd = Queue(io.cmd)
-  val foo = 5.U
+  
+	val cmd = Queue(io.cmd)	
+	val funct = cmd.bits.inst.funct
+	val addr = cmd.bits.rs2(log2Up(outer.n)-1, 0)
+	
+  // io.out := io.in + 1.U;
+	
   // The parts of the command are as follows
   // inst - the parts of the instruction itself
   //   opcode
@@ -30,12 +36,12 @@ class CustomAcceleratorModule(outer: CustomAccelerator)
   // rs2 - the value of source register 2
 }
 
-class WithCustomAccelerator extends Config((site, here, up) => {
+class WithCustomAccelerator(width: Int) extends Config((site, here, up) => {
   case BuildRoCC => Seq(
       (p: Parameters) => {
         implicit val q = p
         implicit val v = implicitly[ValName]
-        LazyModule(new CustomAccelerator(OpcodeSet.custom0 | OpcodeSet.custom1)(p))
+        LazyModule(new CustomAccelerator(OpcodeSet.custom0, width)(p))
     }
   )
 	// case BuildRoCC => Seq((p: Parameters) => LazyModule(
