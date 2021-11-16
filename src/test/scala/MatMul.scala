@@ -24,10 +24,7 @@ class MatMulTestA extends FlatSpec with Matchers {
                 println("Input Matrix A is " + peek(c.io.InputMatrixA).toString);
 
                 step(1);
-                println("Stepped");
-                println(peek(c.io.out).toString);
-//              println("\nInputS" + peek(c.io).toString);
-//                println("\nHello, MA(0)" + peek(c.io.out).toString + ", out=" + peek(c.io.out).toString);
+                println("MatMul out is" + peek(c.io.out).toString);
 		
 		expect(c.io.InputMatrixA(0)(0), 8.S);
 
