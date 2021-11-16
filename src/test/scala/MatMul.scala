@@ -5,7 +5,7 @@ import org.scalatest._
 class MatMulTestA extends FlatSpec with Matchers {
 
     "MatMul" should "pass" in {
-        chisel3.iotesters.Driver(() => new MatMul(64)) {c =>
+        chisel3.iotesters.Driver(() => new MatMul(2)) {c =>
             new PeekPokeTester(c) {
                 println("------------------------");
 		
