@@ -16,10 +16,10 @@ class MatMulTestA extends FlatSpec with Matchers {
 		poke(c.io.InputMatrixA(1)(1), 8.S);
 
 		//placing items in Matrix B
-		poke(c.io.InputMatrixb(0)(0), 8.S);
-                poke(c.io.InputMatrixb(0)(1), 8.S);
-                poke(c.io.InputMatrixb(1)(0), 8.S);
-                poke(c.io.InputMatrixb(1)(1), 8.S);
+		poke(c.io.InputMatrixB(0)(0), 8.S);
+                poke(c.io.InputMatrixB(0)(1), 8.S);
+                poke(c.io.InputMatrixB(1)(0), 8.S);
+                poke(c.io.InputMatrixB(1)(1), 8.S);
 
                 println("Input Matrix A is " + peek(c.io.InputMatrixA).toString);
 
