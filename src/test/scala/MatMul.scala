@@ -11,12 +11,6 @@ class MatMulTestA extends FlatSpec with Matchers {
                 poke(c.io.InputMatrixA(0)(0), 8.S);
                 println("Input Matrix A is " + peek(c.io.InputMatrixA).toString);
 
-                //poke(c.io.MB(0), 6.S);
-                //poke(c.io.MB(1), 6.S);
-                
-		//println("MB is " + peek(c.io.MB).toString);
-                //println("Step now");
-
                 step(1);
                 println("Stepped");
                 println(peek(c.io.out).toString);
