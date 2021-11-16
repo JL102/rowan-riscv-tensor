@@ -8,7 +8,19 @@ class MatMulTestA extends FlatSpec with Matchers {
         chisel3.iotesters.Driver(() => new MatMul(64)) {c =>
             new PeekPokeTester(c) {
                 println("------------------------");
+		
+		//placing items in Matrix A
                 poke(c.io.InputMatrixA(0)(0), 8.S);
+		poke(c.io.InputMatrixA(0)(1), 8.S);
+		poke(c.io.InputMatrixA(1)(0), 8.S);
+		poke(c.io.InputMatrixA(1)(1), 8.S);
+
+		//placing items in Matrix B
+		poke(c.io.InputMatrixb(0)(0), 8.S);
+                poke(c.io.InputMatrixb(0)(1), 8.S);
+                poke(c.io.InputMatrixb(1)(0), 8.S);
+                poke(c.io.InputMatrixb(1)(1), 8.S);
+
                 println("Input Matrix A is " + peek(c.io.InputMatrixA).toString);
 
                 step(1);
