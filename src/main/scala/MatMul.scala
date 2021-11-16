@@ -7,7 +7,7 @@ class MatMul(width: Int) extends Module {
       val InputMatrixA = Input(Vec(width,Vec(width,UInt(width.W))));
       val InputMatrixB = Input(Vec(width,Vec(width,UInt(width.W)))); 
 
-      val out = Output(Vec(2,Vec(2,UInt(width.W))));
+      val out = Output(Vec(width,Vec(width,UInt(width.W))));
 	  });
 
 	
