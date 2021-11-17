@@ -10,7 +10,12 @@ class MatMul(size: Int) extends Module {
       val out = Output(Vec(size,Vec(size,UInt(64.W))));
 	  });
 
-	
+	for( var col <- size ){//we need to go accross each column in the output
+		for( var row <- size ){//we need to go down row by row in the output
+
+		}
+		
+	}
 
 
 
