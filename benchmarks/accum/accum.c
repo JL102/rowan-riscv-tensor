@@ -43,5 +43,6 @@ int main(void)
 	if (result != 4)
 		return 2;
 
+
 	return 0;
 }

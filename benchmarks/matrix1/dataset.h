@@ -9,4 +9,4 @@ int input_matrix_2[DATA_SIZE] = {
 	31,2,11
 };
 
-int verify_data = 196;
+int verify_data = 197;

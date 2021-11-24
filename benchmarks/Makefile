@@ -4,6 +4,8 @@ default: all
 bmarks = \
 	matrix1 \
 	accum \
+	median \
+	multiply \
 
 #--------------------------------------------------------------------
 # Build rules
