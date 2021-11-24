@@ -17,6 +17,14 @@ class MulSum(width: Int)(numInputs: Int) extends Module {
 
 
 
-object MultiplierOBJ extends App {
-  (new chisel3.stage.ChiselStage).emitVerilog(new MulSum(64)(4))
+object MulSum {
+  def apply(MA: UInt, MB: UInt) = {
+    val m = Module(new MulSum(64)(4))
+    m.io.MA := MA
+    m.io.MB := MB
+    m.io.out
+  }
+
+
+
 }

@@ -1,7 +1,5 @@
 import chisel3._
-import MulSum.Logic
 
-// Chisel Code, but pass in a parameter to set widths of ports
 class MatMul(size: Int) extends Module { 
    val io = IO(new Bundle {
       val InputMatrixA = Input(Vec(size,Vec(size,UInt(64.W))));
@@ -19,6 +17,11 @@ class MatMul(size: Int) extends Module {
 	}
 
 */
+	//Initialize the object
+	val multiplier = Module(new MulSum(64)(4))
+	//Set the ports
+	multiplier.io.MA 
+
 
 
 
