@@ -1,5 +1,5 @@
 import chisel3._
-
+import MulSum.Logic
 
 // Chisel Code, but pass in a parameter to set widths of ports
 class MatMul(size: Int) extends Module { 
@@ -10,6 +10,7 @@ class MatMul(size: Int) extends Module {
       val out = Output(Vec(size,Vec(size,UInt(64.W))));
 	  });
 
+/*
 	for( var col <- size ){//we need to go accross each column in the output
 		for( var row <- size ){//we need to go down row by row in the output
 
@@ -17,7 +18,7 @@ class MatMul(size: Int) extends Module {
 		
 	}
 
-
+*/
 
 
 
