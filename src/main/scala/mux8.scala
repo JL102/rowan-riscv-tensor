@@ -8,9 +8,7 @@ class Mux8 extends Module {
     val in5 = Input(Uint(64.W))
     val in6 = Input(Uint(64.W))
     val in7 = Input(Uint(64.W))
-    val sel0 = Input(UInt(1.W))
-    val sel1 = Input(UInt(1.W))
-    val sel2 = Input(Uint(1.W))
+    val sel = Input(UInt(3.W))
     val out = Output(UInt(1.W))
   })
   io.out := Mux(io.sel, io.in0, io.in1, io.in2, io.in3, io.in4, io.in5, io.in6, io.in7 )
@@ -28,9 +26,7 @@ object Mux8 {
     m.io.in6 := in6
     m.io.in7 := in7
     m.io.in8 := in8
-    m.io.sel0 := sel
-    m.io.sel2 := sel2
-    m.io.sel3 := sel3
+    m.io.sel := sel
     m.io.out
   }
 }
