@@ -5,23 +5,21 @@ import org.scalatest._
 class MulSumTestA extends FlatSpec with Matchers {
     
     "MulSum" should "pass" in {
-        chisel3.iotesters.Driver(() => new MulSum(64)(4)) {c => 
+        chisel3.iotesters.Driver(() => new MulSum(64)(3)) {c => 
             new PeekPokeTester(c) {
 		println("------------------------");
                 poke(c.io.MA(0), 8.S);
 		poke(c.io.MA(1), 8.S);
 		poke(c.io.MA(2), 8.S);
-		poke(c.io.MA(3), 8.S);		
+		
 		println("MA is " + peek(c.io.MA).toString);
 
 		poke(c.io.MB(0), 6.S);
 		poke(c.io.MB(1), 6.S);
 		poke(c.io.MB(2), 6.S);
-		poke(c.io.MB(3), 0.S);
 
 		println("MB is " + peek(c.io.MB).toString);
 		println("Step now");
-
 		step(1);
 		println("Stepped");
                 expect(c.io.out, 144.S);

@@ -8,5 +8,4 @@ log.txt
 *.riscv
 #Swap files from nano
 *.swp
-benchmarks\*
-
+*.dump
