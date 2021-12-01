@@ -9,3 +9,4 @@ log.txt
 #Swap files from nano
 *.swp
 *.dump
+*.save
