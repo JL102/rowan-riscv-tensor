@@ -10,3 +10,5 @@ AND in lazy val chipyard, add customtensor to the list
 https://inst.eecs.berkeley.edu//~cs250/fa13/handouts/lab3-sumaccel.pdf
 
 io.mem: https://github.com/cnrv/rocket-chip-read/blob/master/rocket/HellaCache.md
+
+Use GTXWave and verilator debug mode

@@ -6,9 +6,10 @@ import chisel3.experimental.IO
 import freechips.rocketchip.tile._
 import freechips.rocketchip.config._
 import freechips.rocketchip.diplomacy._
-import freechips.rocketchip.rocket.{TLBConfig, HellaCacheReq}
+import freechips.rocketchip.rocket._
+import freechips.rocketchip.rocket.ALU._
 
-class CustomAccelerator(opcodes: OpcodeSet, width: Int)
+class CustomAccelerator(opcodes: OpcodeSet, val width: Int)
     (implicit p: Parameters) extends LazyRoCC(opcodes) {
   override lazy val module = new CustomAcceleratorModule(this, width)
 }
@@ -16,31 +17,111 @@ class CustomAccelerator(opcodes: OpcodeSet, width: Int)
 class CustomAcceleratorModule(outer: CustomAccelerator, width: Int)
     extends LazyRoCCModuleImp(outer) 
     with HasCoreParameters {
+  val reg_operands = Mem(outer.width, UInt(xLen.W))
+  val reg_results = Mem(outer.width, UInt(xLen.W))
+  
+  val busy = RegInit(VecInit(Seq.fill(outer.width){false.B})) // way of keeping track of what's busy and what's not
+  val imul = Module(new PipelinedMultiplier(xLen, 2)) // numStages can change at some point I think
+  // todo: keep track of when multiplier is busy
+  val imul_busy = RegInit(VecInit(Seq.fill(1){false.B}))
   
   val cmd = Queue(io.cmd)	
-  val funct = cmd.bits.inst.funct
+  val funct       = cmd.bits.inst.funct
+  val matrixIdx   = cmd.bits.rs1(log2Up(outer.width)-1,0)
+  val memAddress  = cmd.bits.rs2
+  val doMultiply  = funct === 1.U // Perform multiplication
+  val doLoad      = funct === 3.U // Load matrices from memory
+  val doRetrieve  = funct === 4.U // Retrieve result
+  
+  val memRespTag  = io.mem.resp.bits.tag(log2Up(outer.width)-1,0)
+  
+  // Multiply the stored values
+  val a = reg_operands(0.U)
+  val b = reg_operands(1.U)
+  val wdata_multiply = reg_results(0.U)
+  
+  // When memory is busy, set it to busy
+  when (io.mem.req.fire()) {
+    busy(matrixIdx) := true.B
+  }
+  
+  // Ran into issues when using imul.io.req.fire() 
+  //    (I think fire() returned true when I didn't expect it to)
+  //  Since I'm controlling the multiplier, I know when it's busy or not
+  //  so I don't need to wait for it to "fire" to know it's gonna be busy
+  when (imul.io.req.valid && !imul.io.resp.valid) {
+    imul_busy(0.U) := true.B
+  }
+  
+  // When memory load has been returned
+  when (io.mem.resp.valid) {
+    reg_operands(memRespTag) := io.mem.resp.bits.data.asUInt // mem has to be uint
+    busy(memRespTag) := false.B
+  }
+  
+  // When multiplier is finished
+  when (imul.io.resp.valid) {
+    reg_results(0.U) := imul.io.resp.bits.data
+    imul_busy(0.U) := false.B
+  }
   
   
-  val a = cmd.bits.rs1
-  val b = cmd.bits.rs2
-  val wdata = a * b
-  
+  // datapath?
+  val anyLoadsBusy = busy.reduce(_||_)
+  val anyImulBusy = imul_busy.reduce(_||_)
   val doResp = cmd.bits.inst.xd
-  val stallResp = doResp && !io.resp.ready
+  val stallReg = busy(matrixIdx)
+  val stallLoad = doLoad && !io.mem.req.ready
+  val stallResp = doResp && !io.resp.ready 
+  val stallMul = doMultiply && !imul.io.resp.valid || anyImulBusy
   
-  cmd.ready := !stallResp
+  // Prepare the multiplier
+  //   Only activate the multiplier when the command is valid
+  imul.io.req.valid := cmd.valid && doMultiply && !anyLoadsBusy
+  imul.io.req.bits.fn := FN_MUL // riscv instruction: MUL is fine
+  imul.io.req.bits.dw := true.B // 64b doubleword
+  imul.io.req.bits.in1 := a 
+  imul.io.req.bits.in2 := b 
+  imul.io.req.bits.tag := DontCare 
   
-  io.resp.valid := cmd.valid && doResp
+  cmd.ready := !stallReg && !stallLoad && !stallResp && !stallMul
+    // command resolved if no stalls AND not waiting for a load
+  
+  // this is where the results of the multiply is sent
+  io.resp.valid := cmd.valid && doResp && !stallReg && !stallMul
     // valid response if valid command, need a response, and no stalls
   io.resp.bits.rd := cmd.bits.inst.rd
     // Must respond with the appropriate tag or undefined behavior
-  io.resp.bits.data := wdata
-  // val addr = cmd.bits.rs2(log2Up(outer.n)-1, 0)
+  io.resp.bits.data := wdata_multiply
   
-  io.busy := cmd.valid
+  io.busy := cmd.valid || anyLoadsBusy || anyImulBusy
+    // Be busy when have pending memory requests or committed possibility of pending requests
   io.interrupt := false.B
-  // io.out := io.in + 1.U;
   
+  // MEMORY REQUEST INTERFACE
+  io.mem.req.valid := cmd.valid && doLoad && !stallReg && !stallResp
+  io.mem.req.bits.addr := memAddress
+  io.mem.req.bits.tag := matrixIdx
+  io.mem.req.bits.cmd := M_XRD // perform a load
+  io.mem.req.bits.size := log2Ceil(8).U 
+  io.mem.req.bits.signed := true.B //might change
+  io.mem.req.bits.data := 0.U // Not storing anything
+  io.mem.req.bits.phys := false.B // not sure what this is
+  io.mem.req.bits.dprv := cmd.bits.status.dprv // not sure what this is
+  
+}
+
+class WithCustomAccelerator(width: Int) extends Config((site, here, up) => {
+  case BuildRoCC => Seq(
+      (p: Parameters) => {
+        implicit val q = p
+        implicit val v = implicitly[ValName]
+        LazyModule(new CustomAccelerator(OpcodeSet.custom1, width)(p))
+    }
+  )
+})
+
+
   // The parts of the command are as follows
   // inst - the parts of the instruction itself
   //   opcode
@@ -53,109 +134,3 @@ class CustomAcceleratorModule(outer: CustomAccelerator, width: Int)
   //   xs2 - is the second source register being used?f
   // rs1 - the value of source register 1
   // rs2 - the value of source register 2
-}
-
-class WithCustomAccelerator(width: Int) extends Config((site, here, up) => {
-  case BuildRoCC => Seq(
-      (p: Parameters) => {
-        implicit val q = p
-        implicit val v = implicitly[ValName]
-        LazyModule(new CustomAccelerator(OpcodeSet.custom1, width)(p))
-    }
-  )
-  // case BuildRoCC => Seq((p: Parameters) => LazyModule(
-
-  // 	new CustomAccelerator(OpcodeSet.custom0 | OpcodeSet.custom1)(p))
-  // )
-  // case BuildRoCC => up(BuildRoCC) ++ Seq(
-  // 	(p: Parameters) => {
-  // 		val sha3 = LazyModule.apply(new CustomAccelerator(OpcodeSet.custom2)(p))
-  // 		sha3
-  // 	}
-  // )
-})
-
-// class AccumulatorExample(opcodes: OpcodeSet, val n: Int = 4)(implicit p: Parameters) extends LazyRoCC(opcodes) {
-//   override lazy val module = new AccumulatorExampleModuleImp(this)
-// }
-
-// class AccumulatorExampleModuleImp(outer: AccumulatorExample)(implicit p: Parameters) extends LazyRoCCModuleImp(outer)
-//     with HasCoreParameters {
-//   val regfile = Mem(outer.n, UInt(xLen.W))
-//   val busy = RegInit(VecInit(Seq.fill(outer.n){false.B}))
-
-//   val cmd = Queue(io.cmd)
-//   val funct = cmd.bits.inst.funct
-//   val addr = cmd.bits.rs2(log2Up(outer.n)-1,0)
-//   val doWrite = funct === 0.U
-//   val doRead = funct === 1.U
-//   val doLoad = funct === 2.U
-//   val doAccum = funct === 3.U
-//   val memRespTag = io.mem.resp.bits.tag(log2Up(outer.n)-1,0)
-
-//   // datapath
-//   val addend = cmd.bits.rs1
-//   val accum = regfile(addr)
-//   val wdata = Mux(doWrite, addend, accum + addend)
-
-//   when (cmd.fire() && (doWrite || doAccum)) {
-//     regfile(addr) := wdata
-//   }
-
-//   when (io.mem.resp.valid) {
-//     regfile(memRespTag) := io.mem.resp.bits.data
-//     busy(memRespTag) := false.B
-//   }
-
-//   // control
-//   when (io.mem.req.fire()) {
-//     busy(addr) := true.B
-//   }
-
-//   val doResp = cmd.bits.inst.xd
-//   val stallReg = busy(addr)
-//   val stallLoad = doLoad && !io.mem.req.ready
-//   val stallResp = doResp && !io.resp.ready
-
-//   cmd.ready := !stallReg && !stallLoad && !stallResp
-//     // command resolved if no stalls AND not issuing a load that will need a request
-
-//   // PROC RESPONSE INTERFACE
-//   io.resp.valid := cmd.valid && doResp && !stallReg && !stallLoad
-//     // valid response if valid command, need a response, and no stalls
-//   io.resp.bits.rd := cmd.bits.inst.rd
-//     // Must respond with the appropriate tag or undefined behavior
-//   io.resp.bits.data := accum
-//     // Semantics is to always send out prior accumulator register value
-
-//   io.busy := cmd.valid || busy.reduce(_||_)
-//     // Be busy when have pending memory requests or committed possibility of pending requests
-//   io.interrupt := false.B
-//     // Set this true to trigger an interrupt on the processor (please refer to supervisor documentation)
-
-//   // MEMORY REQUEST INTERFACE
-//   io.mem.req.valid := cmd.valid && doLoad && !stallReg && !stallResp
-//   io.mem.req.bits.addr := addend
-//   io.mem.req.bits.tag := addr
-//   io.mem.req.bits.cmd := M_XRD // perform a load (M_XWR for stores)
-//   io.mem.req.bits.size := log2Ceil(8).U
-//   io.mem.req.bits.signed := false.B
-//   io.mem.req.bits.data := 0.U // we're not performing any stores...
-//   io.mem.req.bits.phys := false.B
-//   io.mem.req.bits.dprv := cmd.bits.status.dprv
-// }
-
-// class OpcodeSet(val opcodes: Seq[UInt]) {
-//   def |(set: OpcodeSet) =
-//     new OpcodeSet(this.opcodes ++ set.opcodes)
-
-//   def matches(oc: UInt) = opcodes.map(_ === oc).reduce(_ || _)
-// }
-
-// object OpcodeSet {
-//   def custom0 = new OpcodeSet(Seq("b0001011".U))
-//   def custom1 = new OpcodeSet(Seq("b0101011".U))
-//   def custom2 = new OpcodeSet(Seq("b1011011".U))
-//   def custom3 = new OpcodeSet(Seq("b1111011".U))
-//   def all = custom0 | custom1 | custom2 | custom3
-// }
