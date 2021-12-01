@@ -4,7 +4,7 @@ import chisel3.util.{switch, is}
 //This decoder is very bad
 //Do not attempt to learn anything from this
 
-class Mux2 extends Module {
+class Decoder8_1 extends Module {
   val io = IO(new Bundle {
     val sel = Input(Bool(3.W))
     val in = Input(UInt(64.W))
@@ -50,8 +50,8 @@ class Mux2 extends Module {
       io.out7 := io.in
     }
 }
-
-object Mux2 {
+}
+object Decoder8 {
   def apply(sel: UInt, in0: UInt, in1: UInt) = {
     val m = Module(new Mux2)
     m.io.in0 := in0
