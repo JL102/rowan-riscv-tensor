@@ -30,36 +30,25 @@ class Mux2 extends Module {
     }
     is(1) {
       io.out1 := io.in
-
     }
     is(2) {
       io.out2 := io.in
-
     }
     is(3) {
       io.out3 := io.in
-
     }
     is(4) {
       io.out4 := io.in
-
     }
     is(5) {
       io.out5 := io.in
-
     }
     is(6) {
       io.out6 := io.in
-
     }
     is(7) {
       io.out7 := io.in
-
     }
-
-
-
-
 }
 
 object Mux2 {
