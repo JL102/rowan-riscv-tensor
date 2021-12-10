@@ -1,3 +1,5 @@
+// The BSD 3-Clause License applies to this file.
+
 #include "rocc.h"
 
 static inline void accum_write(int idx, unsigned long data)

@@ -1,0 +1,1 @@
+The BSD 3-Clause License applies to all files in this folder.
