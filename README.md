@@ -1,5 +1,5 @@
 # rowan-riscv-tensor
-A RISCV based matrix multiplication accelerator, built using Chipyard.
+A RISC-V based matrix multiplication accelerator, built using Chipyard.
 
 
 ToDo
