@@ -100,10 +100,10 @@ class CustomAcceleratorModule(outer: CustomAccelerator, width: Int)
   
   // MEMORY REQUEST INTERFACE
   io.mem.req.valid := cmd.valid && doLoad && !stallReg && !stallResp
-  io.mem.req.bits.addr := memAddress
+  io.mem.req.bits.addr := memAddress + 64.U
   io.mem.req.bits.tag := matrixIdx
   io.mem.req.bits.cmd := M_XRD // perform a load
-  io.mem.req.bits.size := log2Ceil(8).U 
+  io.mem.req.bits.size := log2Ceil(8).U // don't think this is needed, doesn't change anything
   io.mem.req.bits.signed := true.B //might change
   io.mem.req.bits.data := 0.U // Not storing anything
   io.mem.req.bits.phys := false.B // not sure what this is
