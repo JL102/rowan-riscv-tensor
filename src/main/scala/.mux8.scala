@@ -1,3 +1,8 @@
+/*
+Depricated use
+https://www.chisel-lang.org/api/latest/chisel3/Mux$.html
+*/
+
 import chisel3._
 class Mux8 extends Module {
   val io = IO(new Bundle {
