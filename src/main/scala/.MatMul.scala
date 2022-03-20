@@ -20,7 +20,7 @@ class MatMul(size: Int) extends Module {
 	//Initialize the object
 	val multiplier = Module(new MulSum(64)(4))
 	//Set the ports
-	multiplier.io.MA 
+	//multiplier.io.MA 
 
 
 
