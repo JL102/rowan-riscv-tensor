@@ -25,7 +25,7 @@ class CustomAcceleratorModule(outer: CustomAccelerator, width: Int)
   // todo: keep track of when multiplier is busy
   val imul_busy = RegInit(VecInit(Seq.fill(1){false.B}))
   
-  val cmd = Queue(io.cmd)	
+  val cmd = io.cmd
   val funct       = cmd.bits.inst.funct
   val matrixIdx   = cmd.bits.rs1(log2Up(outer.width)-1,0)
   val memAddress  = cmd.bits.rs2
@@ -100,7 +100,7 @@ class CustomAcceleratorModule(outer: CustomAccelerator, width: Int)
   
   // MEMORY REQUEST INTERFACE
   io.mem.req.valid := cmd.valid && doLoad && !stallReg && !stallResp
-  io.mem.req.bits.addr := memAddress + 64.U
+  io.mem.req.bits.addr := memAddress + 8.U
   io.mem.req.bits.tag := matrixIdx
   io.mem.req.bits.cmd := M_XRD // perform a load
   io.mem.req.bits.size := log2Ceil(8).U // don't think this is needed, doesn't change anything
@@ -110,6 +110,10 @@ class CustomAcceleratorModule(outer: CustomAccelerator, width: Int)
   io.mem.req.bits.dprv := cmd.bits.status.dprv // not sure what this is
   
 }
+
+// If we have them int and not long, we can retrieve 2 at once
+// it appears that HellaCache only allows us to retrieve data in blocks of 8
+// so adding 8 to the mem address brings us up by 64 bits
 
 class WithCustomAccelerator(width: Int) extends Config((site, here, up) => {
   case BuildRoCC => Seq(
