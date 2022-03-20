@@ -8,7 +8,7 @@ class MulSumTestA extends FlatSpec with Matchers {
         chisel3.iotesters.Driver(() => new MulSum(64)(3)) {c => 
             new PeekPokeTester(c) {
 		println("------------------------");
-                poke(c.io.MA(0), 8.S);
+        poke(c.io.MA(0), 8.S);
 		poke(c.io.MA(1), 8.S);
 		poke(c.io.MA(2), 8.S);
 		
