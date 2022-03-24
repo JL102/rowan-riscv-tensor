@@ -1,6 +1,7 @@
 # rowan-riscv-tensor
 A RISC-V based matrix multiplication accelerator, built using Chipyard.
 
+To begin working on this repo, go to your chipyard install folder, and navigate to 'generators'. Clone the repository to this directory. Next navigate back up to the chipyard directory and edit 'build.sbt'. Copy the lines inside 'notes.txt' from this repository into 'build.sbt'. Finally find 'lazy val chipyard = (project in file("generators/chipyard))' and add the folder for this project to the list. For example, by default the repositry is cloned to a folder called 'rowan-riscv-tensor', so you would add that to the list.
 
 ToDo
 - [ ] Create a working decoder (Demux)
