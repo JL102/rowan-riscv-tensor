@@ -10,3 +10,5 @@ log.txt
 *.swp
 *.dump
 *.save
+*.out
+test
