@@ -6,6 +6,7 @@ bmarks = \
 	accum \
 	median \
 	multiply \
+	multiply_old \
 
 #--------------------------------------------------------------------
 # Build rules

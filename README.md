@@ -3,7 +3,22 @@ A RISC-V based matrix multiplication accelerator, built using Chipyard.
 
 To begin working on this repo, go to your chipyard install folder, and navigate to 'generators'. Clone the repository to this directory. Next navigate back up to the chipyard directory and edit 'build.sbt'. Copy the lines inside 'notes.txt' from this repository into 'build.sbt'. Finally find 'lazy val chipyard = (project in file("generators/chipyard))' and add the folder for this project to the list. For example, by default the repositry is cloned to a folder called 'rowan-riscv-tensor', so you would add that to the list.
 
-Now, navigate to 'chipyard/generators/chipyard/src/main/scala/config'
+Now, navigate to `chipyard/generators/chipyard/src/main/scala/config`.
+
+Inside HeteroConfigs.scala, add the following lines:
+
+```scala
+class CustomAcceleratorConfig extends Config(
+  new customtensor.WithCustomAccelerator(3) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
+  new chipyard.config.AbstractConfig)
+```
+
+This creates a configuration which uses a rocket core and our custom accelerator. Next, navigate to `chipyard/sims/verilator`.
+
+Inside the terminal, type the following and enter: `make CONFIG=CustomAcceleratorConfig`
+
+If everything works, it will create an executable, `simulator-chipyard-CustomAcceleratorConfig`.
 
 ToDo
 - [ ] Create a working decoder (Demux)
